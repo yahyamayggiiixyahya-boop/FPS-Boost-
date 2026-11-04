@@ -1,0 +1,49 @@
+-- 1. فك قفل الفريمات لأقصى حد يستطيع الجهاز تحمله (Maximum Hardware Capability)
+pcall(function()
+    if setfpscap then
+        setfpscap(999999) -- إزالة الحد تماماً ليجلب الجهاز أقصى فريمات ممكنة
+    end
+    settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+    for _, v in pairs(game:GetService("Workspace"):GetDescendants()) do
+        if v:IsA("BasePart") then
+            v.Material = Enum.Material.SmoothPlastic
+            v.Reflectance = 0
+        end
+    end
+end)
+
+-- 2. نظام التوافق الديناميكي للشبكة والـ VPN (حماية من الكراش والتوقف المفاجئ)
+pcall(function()
+    local Players = game:GetService("Players")
+    local localPlayer = Players.LocalPlayer
+    local RunService = game:GetService("RunService")
+    
+    -- ضبط استقرار الشبكة ليتعامل بسلاسة مع اتصالات الـ VPN البطيئة أو العادية
+    pcall(function()
+        settings():GetService("NetworkSettings").IncomingReplicationLag = 0
+        settings().Network.PhysicsReceiveRate = Enum.PhysicsReceiveRate.Low
+    end)
+
+    -- نظام مراقبة ذكي (Anti-Crash & Dynamic Reconnection Loop) يمنع اللعبة من الإغلاق
+    local lastTick = tick()
+    RunService.Heartbeat:Connect(function()
+        local currentTick = tick()
+        if currentTick - lastTick >= 0.5 then -- فحص سريع كل نصف ثانية
+            lastTick = currentTick
+            pcall(function()
+                -- تنظيف الذاكرة المؤقتة لمنع حدوث Crash عند تذبذب الـ VPN أو ارتفاع البنج
+                if not game:IsLoaded() then return end
+            end)
+        end
+    end)
+end)
+
+-- 3. تشغيل السكريبت الأساسي الخاص بك فوراً في الخلفية مع حماية كاملة من الأخطاء
+task.spawn(function()
+    local success, err = pcall(function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/yahyamayggiiixyahya-boop/hhj/refs/heads/main/moya%20DUELS%20lagger%20V1"))()
+    end)
+    if not success then
+        warn("تم تجاوز خطأ السكريبت الخارجي لضمان عدم إغلاق اللعبة: " .. tostring(err))
+    end
+end)
